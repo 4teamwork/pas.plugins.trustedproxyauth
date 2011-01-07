@@ -10,33 +10,36 @@ from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 from socket import getaddrinfo, herror
 
-logger = logging.getLogger('pas.plugins.trustedproxy')
+logger = logging.getLogger('pas.plugins.trustedproxyauth')
 
 IS_IP = re.compile("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])"
                    "(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}$")
 
 
-manage_addTrustedProxyPlugin = PageTemplateFile("browser/addPlugin",
-    globals(), __name__="manage_addTrustedProxyPlugin")
+manage_addTrustedProxyAuthPlugin = PageTemplateFile("www/addPlugin",
+    globals(), __name__="manage_addTrustedProxyAuthPlugin")
 
 
-def addTrustedProxyPlugin(dispatcher, id, title="", user_model=None, group_model=None, REQUEST=None):
+def addTrustedProxyAuthPlugin(dispatcher, id, title="", trusted_proxies=(),
+                              login_header='', lowercase_logins= False,
+                              REQUEST=None):
     """Add a TrustedProxy plugin to a PAS."""
-    p=TrustedProxyPlugin(id, title)
+    p=TrustedProxyAuthPlugin(id, title, trusted_proxies, login_header,
+                             lowercase_logins)
     dispatcher._setObject(p.getId(), p)
 
     if REQUEST is not None:
         REQUEST.response.redirect("%s/manage_workspace"
-                "?manage_tabs_message=SQLAlchemy+plugin+added." %
-                self.absolute_url())
+                "?manage_tabs_message=TrustedProxyAuthPlugin+plugin+added." %
+                dispatcher.absolute_url())
 
 
-class TrustedProxyPlugin(BasePlugin, Cacheable):
+class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
     """A PAS Plugin that authenticats users coming from a trusted proxy with
        their login name set in a request header.
     """
 
-    meta_type = 'Trusted proxy authentication'
+    meta_type = 'Trusted Proxy Authentication'
     security = ClassSecurityInfo()
 
     _properties = BasePlugin._properties + (
@@ -50,12 +53,21 @@ class TrustedProxyPlugin(BasePlugin, Cacheable):
               'type'  : 'string',
               'mode'  : 'w',
             },
+            { 'id'    : 'lowercase_logins',
+              'label' : 'Transform login names to lowercase',
+              'type'  : 'boolean',
+              'mode'  : 'w',
+            },
     )
 
 
-    def __init__(self, id, title=None):
-        self._setId( id )
+    def __init__(self, id, title=None, trusted_proxies=None,
+                 login_header=None, lowercase_logins=False):
+        self._setId(id)
         self.title = title
+        self.trusted_proxies = trusted_proxies
+        self.login_header = login_header
+        self.lowercase_logins = lowercase_logins
 
     security.declarePrivate('authenticateCredentials')
     def authenticateCredentials(self, credentials):
@@ -74,8 +86,8 @@ class TrustedProxyPlugin(BasePlugin, Cacheable):
             return None
 
         if (not login or extractor != self.getId()):
-            logger.warn('authenticateCredentials ignoring request '
-                        'from %r for %r/%r', extractor, uid, login)
+            logger.debug('authenticateCredentials ignoring request '
+                         'from %r for %r/%r', extractor, uid, login)
             return None
 
         for idx, addr in enumerate(trusted_proxies):
@@ -114,6 +126,8 @@ class TrustedProxyPlugin(BasePlugin, Cacheable):
         remote_address = request.get('REMOTE_ADDR', '')
 
         if login and remote_address:
+            if self.getProperty('lowercase_logins', False):
+                login = login.lower()
             # `login` and `id` might be overriden below.
             creds['id'] = login
             creds['login'] = login
@@ -127,8 +141,8 @@ class TrustedProxyPlugin(BasePlugin, Cacheable):
 
 
 
-classImplements(TrustedProxyPlugin,
+classImplements(TrustedProxyAuthPlugin,
                 IAuthenticationPlugin,
                 IExtractionPlugin)
 
-InitializeClass(TrustedProxyPlugin)
+InitializeClass(TrustedProxyAuthPlugin)

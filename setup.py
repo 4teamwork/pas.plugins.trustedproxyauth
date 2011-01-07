@@ -38,7 +38,7 @@ tests_require = ['zope.testing']
 
 setup(name='pas.plugins.trustedproxy',
       version=version,
-      description="Authenticates users who's login name is stored in the request header by a trusted proxy",
+      description="Authenticates users who's login name is stored in a request header by a trusted proxy",
       long_description=long_description,
       # Get more strings from
       # http://pypi.python.org/pypi?%3Aaction=list_classifiers

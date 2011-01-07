@@ -1,7 +1,14 @@
-import install
+from Products.PluggableAuthService.PluggableAuthService import registerMultiPlugin
+from AccessControl.Permissions import manage_users
+from pas.plugins.trustedproxy import plugin
 
-install.register_trustedproxy_plugin()
 
 def initialize(context):
     """Initializer called when used as a Zope 2 product."""
-    install.register_trustedproxy_plugin_class(context)
+
+    registerMultiPlugin(plugin.TrustedProxyAuthPlugin.meta_type)
+    context.registerClass(plugin.TrustedProxyAuthPlugin,
+            permission=manage_users,
+            constructors=(plugin.manage_addTrustedProxyAuthPlugin,
+                          plugin.addTrustedProxyAuthPlugin),
+            visibility=None)

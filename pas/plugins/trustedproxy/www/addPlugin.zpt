@@ -1,0 +1,47 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:tal="http://xml.zope.org/namespaces/tal">
+  <body>
+    <h1 tal:replace="structure here/manage_page_header">Header</h1>
+
+    <h2 tal:define="form_title string:Trusted Proxy Authentication Plugin"
+        tal:replace="structure here/manage_form_title">Form Title</h2>
+
+    <p class="form-help">
+      Authenticates users who's login name is stored in a request header by a trusted proxy.
+    </p>
+
+    <form action="addTrustedProxyAuthPlugin" method="post">
+      <table>
+        <tr>
+          <td class="form-label">Id</td>
+          <td><input type="text" name="id" tal:attributes="value request/id|string:trusted_proxy_auth"/></td>
+        </tr>
+        <tr>
+          <td class="form-label">Title</td>
+          <td><input type="text" name="title"/></td>
+        </tr>
+        <tr>
+          <td class="form-label">Trusted Proxies</td>
+          <td><textarea name="trusted_proxies:list" cols="50" rows="5" tal:content="request/trusted_proxies|string:127.0.0.1"></textarea></td>
+        </tr>
+        <tr>
+          <td class="form-label">Login Header</td>
+          <td><input type="text" name="login_header" tal:attributes="value request/login_header|string:X_HTTP_REMOTE_USER"/></td>
+        </tr>
+        <tr>
+          <td class="form-label">Lowercase Logins</td>
+          <td><input type="checkbox" name="lowercase_login" value="1" tal:attributes="checked request/lowercase_login|string:1" />
+        </td>
+        </tr>        
+        
+        <tr>
+          <td colspan="2">
+            <div class="form-element">
+              <input type="submit" value="add plugin"/>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </body>
+</html>
