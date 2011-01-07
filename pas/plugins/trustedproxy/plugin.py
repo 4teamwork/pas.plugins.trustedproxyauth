@@ -1,5 +1,3 @@
-"""Class: TrustedproxyHelper
-"""
 import re
 import logging
 from AccessControl.SecurityInfo import ClassSecurityInfo
@@ -8,6 +6,7 @@ from OFS.Cache import Cacheable
 from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 from Products.PluggableAuthService.utils import classImplements
 from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin
+from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 from socket import getaddrinfo, herror
 
@@ -17,15 +16,14 @@ IS_IP = re.compile("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])"
                    "(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}$")
 
 
-manage_addTrustedProxyPlugin = PageTemplateFile("templates/addPlugin",
-    globals(), __name__="manage_addPlugin")
+manage_addTrustedProxyPlugin = PageTemplateFile("browser/addPlugin",
+    globals(), __name__="manage_addTrustedProxyPlugin")
 
-def addTrustedProxyPlugin(self, id, title="", user_model=None, group_model=None, REQUEST=None):
-    """Add an SQLAlchemy plugin to a PAS."""
+
+def addTrustedProxyPlugin(dispatcher, id, title="", user_model=None, group_model=None, REQUEST=None):
+    """Add a TrustedProxy plugin to a PAS."""
     p=TrustedProxyPlugin(id, title)
-    p.user_model=user_model
-    p.group_model=group_model
-    self._setObject(p.getId(), p)
+    dispatcher._setObject(p.getId(), p)
 
     if REQUEST is not None:
         REQUEST.response.redirect("%s/manage_workspace"
@@ -34,7 +32,8 @@ def addTrustedProxyPlugin(self, id, title="", user_model=None, group_model=None,
 
 
 class TrustedProxyPlugin(BasePlugin, Cacheable):
-    """
+    """A PAS Plugin that authenticats users coming from a trusted proxy with
+       their login name set in a request header.
     """
 
     meta_type = 'Trusted proxy authentication'
@@ -102,7 +101,7 @@ class TrustedProxyPlugin(BasePlugin, Cacheable):
                     (remote_address, remote_host), trusted_proxies)
         return None
 
-
+    security.declarePrivate('extractCredentials')
     def extractCredentials(self, request):
         """Extract Credentials for Trusted Proxy
         """
@@ -128,6 +127,8 @@ class TrustedProxyPlugin(BasePlugin, Cacheable):
 
 
 
-classImplements(TrustedProxyPlugin, IAuthenticationPlugin)
+classImplements(TrustedProxyPlugin,
+                IAuthenticationPlugin,
+                IExtractionPlugin)
 
 InitializeClass(TrustedProxyPlugin)
