@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the tool of pas.plugins.trustedproxy
+This module contains the tool of pas.plugins.trustedproxyauth
 """
 import os
 from setuptools import setup, find_packages
@@ -24,7 +24,7 @@ long_description = (
     + '\n' +
     read('pas',
          'plugins',
-         'trustedproxy', 'README.txt')
+         'trustedproxyauth', 'README.txt')
     + '\n' +
     'Contributors\n'
     '************\n'
@@ -36,7 +36,7 @@ long_description = (
 
 tests_require = ['zope.testing']
 
-setup(name='pas.plugins.trustedproxy',
+setup(name='pas.plugins.trustedproxyauth',
       version=version,
       description="Authenticates users who's login name is stored in a request header by a trusted proxy",
       long_description=long_description,
@@ -61,7 +61,7 @@ setup(name='pas.plugins.trustedproxy',
                         ],
       tests_require=tests_require,
       extras_require=dict(tests=tests_require),
-      test_suite='pas.plugins.trustedproxy.tests.test_docs.test_suite',
+      test_suite='pas.plugins.trustedproxyauth.tests.test_docs.test_suite',
       entry_points="""
       # -*- entry_points -*-
       [z3c.autoinclude.plugin]

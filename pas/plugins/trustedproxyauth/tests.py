@@ -10,7 +10,7 @@ from Products.PloneTestCase import PloneTestCase as ptc
 from Products.PloneTestCase.layer import PloneSite
 ptc.setupPloneSite()
 
-import pas.plugins.trustedproxy
+import pas.plugins.trustedproxyauth
 
 class TestCase(ptc.PloneTestCase):
     class layer(PloneSite):
@@ -18,7 +18,7 @@ class TestCase(ptc.PloneTestCase):
         def setUp(cls):
             fiveconfigure.debug_mode = True
             zcml.load_config('configure.zcml',
-                             pas.plugins.trustedproxy)
+                             pas.plugins.trustedproxyauth)
             fiveconfigure.debug_mode = False
 
         @classmethod
@@ -30,7 +30,7 @@ def test_suite():
     return unittest.TestSuite([
 
         ztc.FunctionalDocFileSuite(
-            'README.txt', package='pas.plugins.trustedproxy',
+            'README.txt', package='pas.plugins.trustedproxyauth',
             test_class=TestCase),
 
         ])

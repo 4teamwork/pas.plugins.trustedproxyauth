@@ -10,7 +10,7 @@ from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 from socket import getaddrinfo, herror
 
-logger = logging.getLogger('pas.plugins.trustedproxyauth')
+logger = logging.getLogger('pas.plugins.trustedproxyauthauth')
 
 IS_IP = re.compile("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])"
                    "(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}$")

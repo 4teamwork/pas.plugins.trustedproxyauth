@@ -1,4 +1,4 @@
-Tests for pas.plugins.trustedproxy
+Tests for pas.plugins.trustedproxyauth
 
 test setup
 ----------
@@ -18,7 +18,7 @@ Plugin setup
     >>> form = browser.getForm(index=0)
     >>> select = form.getControl(name=':action')
 
-pas.plugins.trustedproxy should be in the list of installable plugins:
+pas.plugins.trustedproxyauth should be in the list of installable plugins:
 
     >>> 'Trustedproxy Helper' in select.displayOptions
     True
@@ -29,11 +29,11 @@ and we can select it:
     >>> select.displayValue
     ['Trustedproxy Helper']
     >>> select.value
-    ['manage_addProduct/pas.plugins.trustedproxy/manage_add_trustedproxy_helper_form']
+    ['manage_addProduct/pas.plugins.trustedproxyauth/manage_add_trustedproxyauth_helper_form']
 
 we add 'Trustedproxy Helper' to acl_users:
 
-    >>> from pas.plugins.trustedproxy.plugin import TrustedproxyHelper
+    >>> from pas.plugins.trustedproxyauth.plugin import TrustedproxyHelper
     >>> myhelper = TrustedproxyHelper('myplugin', 'Trustedproxy Helper')
     >>> self.portal.acl_users['myplugin'] = myhelper
 

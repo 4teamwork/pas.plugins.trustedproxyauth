@@ -2,7 +2,7 @@
     xmlns="http://namespaces.zope.org/zope"
     xmlns:five="http://namespaces.zope.org/five"
     xmlns:browser="http://namespaces.zope.org/browser"
-    i18n_domain="pas.plugins.trustedproxy">
+    i18n_domain="pas.plugins.trustedproxyauth">
 
   <five:registerPackage package="." initialize=".initialize" />
 

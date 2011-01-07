@@ -1,6 +1,6 @@
 from Products.PluggableAuthService.PluggableAuthService import registerMultiPlugin
 from AccessControl.Permissions import manage_users
-from pas.plugins.trustedproxy import plugin
+from pas.plugins.trustedproxyauth import plugin
 
 
 def initialize(context):
