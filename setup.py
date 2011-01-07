@@ -64,10 +64,7 @@ setup(name='pas.plugins.trustedproxy',
       test_suite='pas.plugins.trustedproxy.tests.test_docs.test_suite',
       entry_points="""
       # -*- entry_points -*-
-
       [z3c.autoinclude.plugin]
       target = plone
       """,
-      setup_requires=["PasteScript"],
-      paster_plugins=["ZopeSkel"],
       )
