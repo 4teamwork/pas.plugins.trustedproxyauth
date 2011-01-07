@@ -30,7 +30,7 @@
         </tr>
         <tr>
           <td class="form-label">Lowercase Logins</td>
-          <td><input type="checkbox" name="lowercase_login" value="1" tal:attributes="checked request/lowercase_login|string:1" />
+          <td><input type="checkbox" name="lowercase_logins" value="1" tal:attributes="checked request/lowercase_logins|string:1" />
         </td>
         </tr>        
         

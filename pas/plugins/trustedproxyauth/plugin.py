@@ -21,7 +21,7 @@ manage_addTrustedProxyAuthPlugin = PageTemplateFile("www/addPlugin",
 
 
 def addTrustedProxyAuthPlugin(dispatcher, id, title="", trusted_proxies=(),
-                              login_header='', lowercase_logins= False,
+                              login_header='', lowercase_logins=False,
                               REQUEST=None):
     """Add a TrustedProxy plugin to a PAS."""
     p=TrustedProxyAuthPlugin(id, title, trusted_proxies, login_header,
