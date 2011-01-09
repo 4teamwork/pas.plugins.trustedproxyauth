@@ -100,7 +100,7 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
                 # it can be quite expensive for a 'DNS Miss'.
                 trusted_proxies[idx+1:idx+1] = [t[-1][0] for t in getaddrinfo(addr, None)]
             except herror:
-                logger.debug('Could not resolve hostname to address: %r', addr)
+                logger.warn('Could not resolve hostname to address: %r', addr)
 
         for addr in (remote_address, remote_host):
             if addr in trusted_proxies:
@@ -128,7 +128,6 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
         if login and remote_address:
             if self.getProperty('lowercase_logins', False):
                 login = login.lower()
-            # `login` and `id` might be overriden below.
             creds['id'] = login
             creds['login'] = login
             creds['remote_address'] = remote_address
