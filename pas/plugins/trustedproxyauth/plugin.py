@@ -58,6 +58,16 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
               'type'  : 'boolean',
               'mode'  : 'w',
             },
+            { 'id'    : 'strip_nt_domain',
+              'label' : 'Strip NT domain name from login (DOMAIN\\userid->userid)',
+              'type'  : 'boolean',
+              'mode'  : 'w',
+            },
+            { 'id'    : 'strip_ad_domain',
+              'label' : 'Strip AD domain name from login (userid@domain.name->userid)',
+              'type'  : 'boolean',
+              'mode'  : 'w',
+            },
     )
 
 
@@ -68,6 +78,8 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
         self.trusted_proxies = trusted_proxies
         self.login_header = login_header
         self.lowercase_logins = lowercase_logins
+        self.strip_nt_domain = False
+        self.strip_ad_domain = False
 
     security.declarePrivate('authenticateCredentials')
     def authenticateCredentials(self, credentials):
@@ -126,8 +138,18 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
         remote_address = request.get('REMOTE_ADDR', '')
 
         if login and remote_address:
-            if self.getProperty('lowercase_logins', False):
+
+            if self.lowercase_logins:
                 login = login.lower()
+            if self.strip_nt_domain:
+                # DOMAIN\userid
+                if '\\' in login:
+                    login = login.split('\\', 1)[1]
+            if self.strip_ad_domain:
+                # userid@domain.name
+                if '@' in login:
+                    login = login.split('@', 1)[0]
+
             creds['id'] = login
             creds['login'] = login
             creds['remote_address'] = remote_address
