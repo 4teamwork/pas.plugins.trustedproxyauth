@@ -20,22 +20,22 @@ Plugin setup
 
 pas.plugins.trustedproxyauth should be in the list of installable plugins:
 
-    >>> 'Trustedproxy Helper' in select.displayOptions
+    >>> 'Trusted Proxy Authentication' in select.displayOptions
     True
 
 and we can select it:
 
-    >>> select.getControl('Trustedproxy Helper').click()
+    >>> select.getControl('Trusted Proxy Authentication').click()
     >>> select.displayValue
-    ['Trustedproxy Helper']
+    ['Trusted Proxy Authentication']
     >>> select.value
-    ['manage_addProduct/pas.plugins.trustedproxyauth/manage_add_trustedproxyauth_helper_form']
+    ['manage_addProduct/pas.plugins.trustedproxyauth/manage_addTrustedProxyAuthPlugin']
 
 we add 'Trustedproxy Helper' to acl_users:
 
-    >>> from pas.plugins.trustedproxyauth.plugin import TrustedproxyHelper
-    >>> myhelper = TrustedproxyHelper('myplugin', 'Trustedproxy Helper')
-    >>> self.portal.acl_users['myplugin'] = myhelper
+    >>> from pas.plugins.trustedproxyauth.plugin import TrustedProxyAuthPlugin
+    >>> myplugin = TrustedProxyAuthPlugin('myplugin', 'Trustedproxy Plugin')
+    >>> self.portal.acl_users['myplugin'] = myplugin
 
 and so on. Continue your tests here
 

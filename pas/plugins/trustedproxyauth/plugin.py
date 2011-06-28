@@ -1,22 +1,28 @@
-import re
-import logging
+"""Provides the trusted proxy auth plugin.
+"""
+
 from AccessControl.SecurityInfo import ClassSecurityInfo
 from App.class_init import default__class_init__ as InitializeClass
 from OFS.Cache import Cacheable
-from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
-from Products.PluggableAuthService.utils import classImplements
+from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin
 from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
-from Products.PageTemplates.PageTemplateFile import PageTemplateFile
+from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
+from Products.PluggableAuthService.utils import classImplements
 from socket import getaddrinfo, herror
+import logging
+import re
+
 
 logger = logging.getLogger('pas.plugins.trustedproxyauthauth')
+
 
 IS_IP = re.compile("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])"
                    "(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}$")
 
 
-manage_addTrustedProxyAuthPlugin = PageTemplateFile("www/addPlugin",
+manage_addTrustedProxyAuthPlugin = PageTemplateFile(
+    "www/addPlugin",
     globals(), __name__="manage_addTrustedProxyAuthPlugin")
 
 
@@ -29,47 +35,52 @@ def addTrustedProxyAuthPlugin(dispatcher, id, title="", trusted_proxies=(),
     dispatcher._setObject(p.getId(), p)
 
     if REQUEST is not None:
-        REQUEST.response.redirect("%s/manage_workspace"
-                "?manage_tabs_message=TrustedProxyAuthPlugin+plugin+added." %
+        REQUEST.response.redirect(
+            "%s/manage_workspace"
+            "?manage_tabs_message=TrustedProxyAuthPlugin+plugin+added." % \
                 dispatcher.absolute_url())
 
 
 class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
     """A PAS Plugin that authenticats users coming from a trusted proxy with
-       their login name set in a request header.
+    their login name set in a request header.
     """
 
     meta_type = 'Trusted Proxy Authentication'
     security = ClassSecurityInfo()
 
     _properties = BasePlugin._properties + (
-            { 'id'    : 'trusted_proxies',
-              'label' : 'IP addresses of trusted proxies',
-              'type'  : 'lines',
-              'mode'  : 'w',
-            },
-            { 'id'    : 'login_header',
-              'label' : 'HTTP header containing the login name',
-              'type'  : 'string',
-              'mode'  : 'w',
-            },
-            { 'id'    : 'lowercase_logins',
-              'label' : 'Transform login names to lowercase',
-              'type'  : 'boolean',
-              'mode'  : 'w',
-            },
-            { 'id'    : 'strip_nt_domain',
-              'label' : 'Strip NT domain name from login (DOMAIN\\userid->userid)',
-              'type'  : 'boolean',
-              'mode'  : 'w',
-            },
-            { 'id'    : 'strip_ad_domain',
-              'label' : 'Strip AD domain name from login (userid@domain.name->userid)',
-              'type'  : 'boolean',
-              'mode'  : 'w',
-            },
-    )
+        { 'id'    : 'trusted_proxies',
+          'label' : 'IP addresses of trusted proxies',
+          'type'  : 'lines',
+          'mode'  : 'w',
+          },
 
+        { 'id'    : 'login_header',
+          'label' : 'HTTP header containing the login name',
+          'type'  : 'string',
+          'mode'  : 'w',
+          },
+
+        { 'id'    : 'lowercase_logins',
+          'label' : 'Transform login names to lowercase',
+          'type'  : 'boolean',
+          'mode'  : 'w',
+          },
+
+        { 'id'    : 'strip_nt_domain',
+          'label' : 'Strip NT domain name from login (DOMAIN\\userid->userid)',
+          'type'  : 'boolean',
+          'mode'  : 'w',
+          },
+
+        { 'id'    : 'strip_ad_domain',
+          'label' : 'Strip AD domain name from login (userid@domain.name->userid)',
+          'type'  : 'boolean',
+          'mode'  : 'w',
+          },
+
+        )
 
     def __init__(self, id, title=None, trusted_proxies=None,
                  login_header=None, lowercase_logins=False):
@@ -116,7 +127,7 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
 
         for addr in (remote_address, remote_host):
             if addr in trusted_proxies:
-                logger.debug('trusted user is %r:%r/%r', 
+                logger.debug('trusted user is %r:%r/%r',
                              addr, uid, login)
                 return uid, login
 
@@ -159,7 +170,6 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
                          remote_address, login)
 
         return creds
-
 
 
 classImplements(TrustedProxyAuthPlugin,
