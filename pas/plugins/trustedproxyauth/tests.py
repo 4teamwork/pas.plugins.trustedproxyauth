@@ -1,25 +1,30 @@
+"""Test setup.
+"""
+
+from Products.Five import fiveconfigure
+from Products.Five import zcml
+from Products.PloneTestCase import PloneTestCase as ptc
+from Products.PloneTestCase.PloneTestCase import installPackage
+from Products.PloneTestCase.layer import PloneSite
+from Testing import ZopeTestCase as ztc
+import pas.plugins.trustedproxyauth
 import unittest
 
-from zope.testing import doctestunit
-from zope.component import testing
-from Testing import ZopeTestCase as ztc
 
-from Products.Five import zcml
-from Products.Five import fiveconfigure
-from Products.PloneTestCase import PloneTestCase as ptc
-from Products.PloneTestCase.layer import PloneSite
 ptc.setupPloneSite()
 
-import pas.plugins.trustedproxyauth
 
 class TestCase(ptc.PloneTestCase):
+
     class layer(PloneSite):
+
         @classmethod
         def setUp(cls):
             fiveconfigure.debug_mode = True
             zcml.load_config('configure.zcml',
                              pas.plugins.trustedproxyauth)
             fiveconfigure.debug_mode = False
+            installPackage('pas.plugins.trustedproxyauth', quiet=True)
 
         @classmethod
         def tearDown(cls):
