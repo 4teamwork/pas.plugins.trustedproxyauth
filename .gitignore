@@ -9,3 +9,5 @@ buildout.cfg
 develop-eggs/
 parts/
 var/
+coverage/
+report/
