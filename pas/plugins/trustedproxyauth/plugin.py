@@ -9,7 +9,7 @@ from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlug
 from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
 from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 from Products.PluggableAuthService.utils import classImplements
-from socket import getaddrinfo, herror
+from socket import gethostbyname, herror, gaierror
 import logging
 import re
 
@@ -119,10 +119,10 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
             # If it's not an IP, then it's a hostname, and we need to
             # resolve it to an IP.
             try:
-                # XXX Should we cache calls to getaddrinfo? Supposedly
+                # XXX Should we cache calls to gethostbyname? Supposedly
                 # it can be quite expensive for a 'DNS Miss'.
-                trusted_proxies[idx+1:idx+1] = [t[-1][0] for t in getaddrinfo(addr, None)]
-            except herror:
+                trusted_proxies[idx+1:idx+1] = [gethostbyname(addr)]
+            except (herror, gaierror):
                 logger.warn('Could not resolve hostname to address: %r', addr)
 
         for addr in (remote_address, remote_host):
