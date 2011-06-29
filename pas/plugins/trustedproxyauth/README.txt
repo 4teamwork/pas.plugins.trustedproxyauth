@@ -47,6 +47,8 @@ we add the plugin:
     'HTTP_X_REMOTE_USER'
     >>> form.getControl(name='lowercase_logins').value
     ['1']
+    >>> form.getControl(name='username_mapping:list').value
+    ''
 
     >>> form.getControl(name='title').value = 'Trusted Proxy Auth'
     >>> form.getControl('add plugin').click()
@@ -240,3 +242,42 @@ If a name could not be looked up, it does not work:
 Reset the trusted proxies property:
 
     >>> plugin.trusted_proxies = ['127.0.0.1']
+
+Username mapping
+================
+
+It's possible to map a AD username to a plone username. Let's test
+that. We wan't to map jane.doe to john.doe. This should not work without
+configuring the username_mapping:
+
+    >>> creds = gencreds(plugin, 'jane.doe', '127.0.0.1')
+    >>> print plugin.authenticateCredentials(creds)
+    ('jane.doe', 'jane.doe')
+
+
+When we configure the mapping now, it should work properly:
+
+    >>> browser.open('%s/trusted_proxy_auth/manage_propertiesForm' % acl_users_url)
+    >>> browser.url
+    'http://nohost/plone/acl_users/trusted_proxy_auth/manage_propertiesForm'
+
+    >>> form = browser.getForm(index=0)
+    >>> form.getControl(name='username_mapping:lines').value
+    ''
+    >>> form.getControl(name='username_mapping:lines').value = 'jane.doe:john.doe'
+    >>> form.getControl('Save Changes').click()
+    >>> browser.url
+    'http://nohost/plone/acl_users/trusted_proxy_auth'
+    >>> 'Saved changes.' in browser.contents
+    True
+
+    >>> pprint(plugin._getUsernameMapping())
+    {'jane.doe': 'john.doe'}
+
+    >>> creds = gencreds(plugin, 'jane.doe', '127.0.0.1')
+    >>> print plugin.authenticateCredentials(creds)
+    ('john.doe', 'john.doe')
+
+The strip_nt_domain option should also work:
+
+And also the strip_ad_domain option:

@@ -28,10 +28,11 @@ manage_addTrustedProxyAuthPlugin = PageTemplateFile(
 
 def addTrustedProxyAuthPlugin(dispatcher, id, title="", trusted_proxies=(),
                               login_header='', lowercase_logins=False,
+                              username_mapping=(),
                               REQUEST=None):
     """Add a TrustedProxy plugin to a PAS."""
     p=TrustedProxyAuthPlugin(id, title, trusted_proxies, login_header,
-                             lowercase_logins)
+                             lowercase_logins, username_mapping)
     dispatcher._setObject(p.getId(), p)
 
     if REQUEST is not None:
@@ -81,17 +82,34 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
           'mode'  : 'w',
           },
 
+        { 'id'    : 'username_mapping',
+          'label' : 'Username mapping (adusername:ploneusername)',
+          'type'  : 'lines',
+          'mode'  : 'w',
+          },
+
         )
 
     def __init__(self, id, title=None, trusted_proxies=None,
-                 login_header=None, lowercase_logins=False):
+                 login_header=None, lowercase_logins=False,
+                 username_mapping=None):
         self._setId(id)
         self.title = title
         self.trusted_proxies = trusted_proxies
         self.login_header = login_header
         self.lowercase_logins = lowercase_logins
+        self.username_mapping = username_mapping
         self.strip_nt_domain = False
         self.strip_ad_domain = False
+
+    security.declarePrivate('_getUsernameMapping')
+    def _getUsernameMapping(self):
+        """Returns a dict containing the username
+        mapping configuration.
+        """
+        return dict([line.strip().split(':')
+                     for line in self.username_mapping
+                     if line.strip()])
 
     security.declarePrivate('authenticateCredentials')
     def authenticateCredentials(self, credentials):
@@ -113,6 +131,11 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
             logger.debug('authenticateCredentials ignoring request '
                          'from %r for %r/%r', extractor, uid, login)
             return None
+
+        username_mapping = self._getUsernameMapping()
+        if login in username_mapping:
+            login = username_mapping[login]
+            uid = login
 
         for idx, addr in enumerate(trusted_proxies):
             if IS_IP.match(addr):
