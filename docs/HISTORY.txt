@@ -5,6 +5,10 @@ Changelog
 1.0.1
 -----
 
+* Added username mapping feature for rewriting the username
+  provided by the trusted proxy into a known plone username.
+  [jbaumann]
+
 * Improved hostname to IP resolution
   [jbaumann]
 
