@@ -1,7 +1,18 @@
 Changelog
 =========
 
-1.0dev (unreleased)
--------------------
 
-- Initial release
+1.0.1
+-----
+
+* Improved hostname to IP resolution
+  [jbaumann]
+
+* Added tests
+  [jbaumann]
+
+
+1.0
+---
+
+* Initial release
