@@ -28,10 +28,11 @@ manage_addTrustedProxyAuthPlugin = PageTemplateFile(
 
 def addTrustedProxyAuthPlugin(dispatcher, id, title="", trusted_proxies=(),
                               login_header='', lowercase_logins=False,
+                              username_mapping=(),
                               REQUEST=None):
     """Add a TrustedProxy plugin to a PAS."""
     p=TrustedProxyAuthPlugin(id, title, trusted_proxies, login_header,
-                             lowercase_logins)
+                             lowercase_logins, username_mapping)
     dispatcher._setObject(p.getId(), p)
 
     if REQUEST is not None:
@@ -81,17 +82,65 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
           'mode'  : 'w',
           },
 
+        { 'id'    : 'username_mapping',
+          'label' : 'Username mapping (adusername:ploneusername)',
+          'type'  : 'lines',
+          'mode'  : 'w',
+          },
+
         )
 
     def __init__(self, id, title=None, trusted_proxies=None,
-                 login_header=None, lowercase_logins=False):
+                 login_header=None, lowercase_logins=False,
+                 username_mapping=None):
         self._setId(id)
         self.title = title
         self.trusted_proxies = trusted_proxies
         self.login_header = login_header
         self.lowercase_logins = lowercase_logins
+        self.username_mapping = username_mapping
         self.strip_nt_domain = False
         self.strip_ad_domain = False
+
+    security.declarePrivate('_getUsernameMapping')
+    def _getUsernameMapping(self):
+        """Returns a dict containing the username
+        mapping configuration.
+        """
+        mapping = {}
+        for line in self.username_mapping:
+            if not line.strip():
+                continue
+
+            adlogin, plonelogin = line.strip().split(':')
+            adlogin = self._convertUsername(adlogin)
+
+            mapping[adlogin] = plonelogin
+
+        return mapping
+
+    security.declarePrivate('_convertUsername')
+    def _convertUsername(self, login):
+        """Converts usernames based on the plugin configuration.
+        This includes:
+        - lowercasing
+        - strip NT domain
+        - strip AD domain
+        """
+        if self.lowercase_logins:
+            login = login.lower()
+
+        if self.strip_nt_domain:
+            # DOMAIN\userid
+            if '\\' in login:
+                login = login.split('\\', 1)[1]
+
+        if self.strip_ad_domain:
+            # userid@domain.name
+            if '@' in login:
+                login = login.split('@', 1)[0]
+
+        return login
 
     security.declarePrivate('authenticateCredentials')
     def authenticateCredentials(self, credentials):
@@ -113,6 +162,11 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
             logger.debug('authenticateCredentials ignoring request '
                          'from %r for %r/%r', extractor, uid, login)
             return None
+
+        username_mapping = self._getUsernameMapping()
+        if login in username_mapping:
+            login = username_mapping[login]
+            uid = login
 
         for idx, addr in enumerate(trusted_proxies):
             if IS_IP.match(addr):
@@ -151,16 +205,7 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
 
         if login and remote_address:
 
-            if self.lowercase_logins:
-                login = login.lower()
-            if self.strip_nt_domain:
-                # DOMAIN\userid
-                if '\\' in login:
-                    login = login.split('\\', 1)[1]
-            if self.strip_ad_domain:
-                # userid@domain.name
-                if '@' in login:
-                    login = login.split('@', 1)[0]
+            login = self._convertUsername(login)
 
             creds['id'] = login
             creds['login'] = login
