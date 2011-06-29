@@ -75,7 +75,8 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
           },
 
         { 'id'    : 'strip_ad_domain',
-          'label' : 'Strip AD domain name from login (userid@domain.name->userid)',
+          'label' :
+              'Strip AD domain name from login (userid@domain.name->userid)',
           'type'  : 'boolean',
           'mode'  : 'w',
           },
