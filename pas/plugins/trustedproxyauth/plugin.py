@@ -107,9 +107,40 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
         """Returns a dict containing the username
         mapping configuration.
         """
-        return dict([line.strip().split(':')
-                     for line in self.username_mapping
-                     if line.strip()])
+        mapping = {}
+        for line in self.username_mapping:
+            if not line.strip():
+                continue
+
+            adlogin, plonelogin = line.strip().split(':')
+            adlogin = self._convertUsername(adlogin)
+
+            mapping[adlogin] = plonelogin
+
+        return mapping
+
+    security.declarePrivate('_convertUsername')
+    def _convertUsername(self, login):
+        """Converts usernames based on the plugin configuration.
+        This includes:
+        - lowercasing
+        - strip NT domain
+        - strip AD domain
+        """
+        if self.lowercase_logins:
+            login = login.lower()
+
+        if self.strip_nt_domain:
+            # DOMAIN\userid
+            if '\\' in login:
+                login = login.split('\\', 1)[1]
+
+        if self.strip_ad_domain:
+            # userid@domain.name
+            if '@' in login:
+                login = login.split('@', 1)[0]
+
+        return login
 
     security.declarePrivate('authenticateCredentials')
     def authenticateCredentials(self, credentials):
@@ -174,16 +205,7 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
 
         if login and remote_address:
 
-            if self.lowercase_logins:
-                login = login.lower()
-            if self.strip_nt_domain:
-                # DOMAIN\userid
-                if '\\' in login:
-                    login = login.split('\\', 1)[1]
-            if self.strip_ad_domain:
-                # userid@domain.name
-                if '@' in login:
-                    login = login.split('@', 1)[0]
+            login = self._convertUsername(login)
 
             creds['id'] = login
             creds['login'] = login

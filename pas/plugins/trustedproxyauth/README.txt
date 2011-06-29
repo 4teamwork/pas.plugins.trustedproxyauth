@@ -280,4 +280,27 @@ When we configure the mapping now, it should work properly:
 
 The strip_nt_domain option should also work:
 
+    >>> plugin.username_mapping = ['localdomain\\JANE.DOE:john.doe']
+    >>> print plugin.authenticateCredentials(creds)
+    ('jane.doe', 'jane.doe')
+
+    >>> plugin.strip_nt_domain = True
+    >>> print plugin.authenticateCredentials(creds)
+    ('john.doe', 'john.doe')
+    >>> plugin.strip_nt_domain = False
+
 And also the strip_ad_domain option:
+
+    >>> plugin.strip_ad_domain = False
+    >>> plugin.username_mapping = ['JANE.DOE@domain.local:john.doe']
+    >>> pprint(plugin._getUsernameMapping())
+    {'jane.doe@domain.local': 'john.doe'}
+    >>> print plugin.authenticateCredentials(creds)
+    ('jane.doe', 'jane.doe')
+
+    >>> plugin.strip_ad_domain = True
+    >>> pprint(plugin._getUsernameMapping())
+    {'jane.doe': 'john.doe'}
+    >>> print plugin.authenticateCredentials(creds)
+    ('john.doe', 'john.doe')
+    >>> plugin.strip_ad_domain = False
