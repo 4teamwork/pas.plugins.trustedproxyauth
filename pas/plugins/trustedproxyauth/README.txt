@@ -58,6 +58,7 @@ we add the plugin:
 
 
 test extracting credentials:
+============================
 
     >>> plugin = self.portal.acl_users.trusted_proxy_auth
     >>> plugin
@@ -134,3 +135,108 @@ test extracting credentials:
      'remote_address': '207.46.197.32',
      'remote_host': ''}
     >>> plugin.strip_ad_domain = True
+
+
+test authentication
+===================
+
+    >>> def gencreds(plugin, user, addr, host=None):
+    ...     """generate credentials for testing"""
+    ...     data = {}
+    ...     if plugin:
+    ...         data['extractor'] = plugin.getId()
+    ...     if not host:
+    ...         host = addr
+    ...     data['login'] = data['id'] = user
+    ...     data['remote_address'] = addr
+    ...     data['remote_host'] = host
+    ...     return data
+
+    >>> print plugin.authenticateCredentials({})
+    None
+
+If the extractor is wrong, then nothing is done:
+
+    >>> creds = gencreds(None, 'john.doe', '127.0.0.1')
+    >>> pprint(creds)
+    {'id': 'john.doe',
+     'login': 'john.doe',
+     'remote_address': '127.0.0.1',
+     'remote_host': '127.0.0.1'}
+
+    >>> print plugin.authenticateCredentials(creds)
+    None
+
+    >>> creds['extractor'] = 'peter'
+    >>> print plugin.authenticateCredentials(creds)
+    None
+
+If the extractor is right, authentication will happen:
+
+    >>> creds = gencreds(plugin, 'john.doe', '127.0.0.1')
+    >>> pprint(creds)
+    {'extractor': 'trusted_proxy_auth',
+     'id': 'john.doe',
+     'login': 'john.doe',
+     'remote_address': '127.0.0.1',
+     'remote_host': '127.0.0.1'}
+
+    >>> print plugin.authenticateCredentials(creds)
+    ('john.doe', 'john.doe')
+
+If the IP is not trusted, then it won't authenticate:
+
+    >>> list(plugin.getProperty('trusted_proxies', ()))
+    ['127.0.0.1']
+
+    >>> creds = gencreds(plugin, 'john.doe', '207.46.197.32')
+    >>> pprint(creds)
+    {'extractor': 'trusted_proxy_auth',
+     'id': 'john.doe',
+     'login': 'john.doe',
+     'remote_address': '207.46.197.32',
+     'remote_host': '207.46.197.32'}
+
+    >>> print plugin.authenticateCredentials(creds)
+    None
+
+Either remote_address or remote_host needs to be trusted:
+
+    >>> creds = gencreds(plugin, 'john.doe', '207.46.197.32', '127.0.0.1')
+    >>> pprint(creds)
+    {'extractor': 'trusted_proxy_auth',
+     'id': 'john.doe',
+     'login': 'john.doe',
+     'remote_address': '207.46.197.32',
+     'remote_host': '127.0.0.1'}
+
+    >>> print plugin.authenticateCredentials(creds)
+    ('john.doe', 'john.doe')
+
+If no trusted proxies are defined, no authentication happens:
+
+    >>> print plugin.authenticateCredentials(creds)
+    ('john.doe', 'john.doe')
+    >>> plugin.trusted_proxies = []
+    >>> list(plugin.getProperty('trusted_proxies', ()))
+    []
+    >>> print plugin.authenticateCredentials(creds)
+    None
+
+If a hostname is set as trusted proxy, it's looked up
+
+    >>> plugin.trusted_proxies = ['localhost']
+    >>> list(plugin.getProperty('trusted_proxies', ()))
+    ['localhost']
+    >>> print plugin.authenticateCredentials(creds)
+    ('john.doe', 'john.doe')
+
+If a name could not be looked up, it does not work:
+
+    >>> plugin.trusted_proxies = ['foohost']
+    >>> print plugin.authenticateCredentials(creds)
+    None
+
+Reset the trusted proxies property:
+
+    >>> plugin.trusted_proxies = ['127.0.0.1']
