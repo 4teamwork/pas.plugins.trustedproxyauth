@@ -69,6 +69,12 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
           'mode'  : 'w',
           },
 
+        { 'id'    : 'lowercase_domain',
+          'label' : 'Transform AD domain to lowercase',
+          'type'  : 'boolean',
+          'mode'  : 'w',
+          },
+
         { 'id'    : 'strip_nt_domain',
           'label' : 'Strip NT domain name from login (DOMAIN\\userid->userid)',
           'type'  : 'boolean',
@@ -98,6 +104,7 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
         self.trusted_proxies = trusted_proxies
         self.login_header = login_header
         self.lowercase_logins = lowercase_logins
+        self.lowercase_domain = False
         self.username_mapping = username_mapping
         self.strip_nt_domain = False
         self.strip_ad_domain = False
@@ -130,6 +137,10 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
         if self.lowercase_logins:
             login = login.lower()
 
+        elif self.lowercase_domain and '@' in login:
+            user, domain = login.rsplit('@', 1)
+            login = '%s@%s' % (user, domain.lower())
+            
         if self.strip_nt_domain:
             # DOMAIN\userid
             if '\\' in login:

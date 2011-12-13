@@ -1,22 +1,28 @@
 Changelog
 =========
 
+1.0.1 (unreleased)
+------------------
 
-1.0.1
------
+- Added option to lowercase AD domain part of login.
+  [buchi]
 
-* Added username mapping feature for rewriting the username
+- Added username mapping feature for rewriting the username
   provided by the trusted proxy into a known plone username.
   [jbaumann]
 
-* Improved hostname to IP resolution
+- Improved hostname to IP resolution
   [jbaumann]
 
-* Added tests
+- Added tests
   [jbaumann]
 
+- Added option to strip NT and AD domains from login.
+  [buchi]
 
-1.0
----
 
-* Initial release
+1.0 (2011-02-25)
+----------------
+
+- Initial release
+  [buchi].

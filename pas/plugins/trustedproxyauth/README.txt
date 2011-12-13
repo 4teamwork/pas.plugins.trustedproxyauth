@@ -136,7 +136,23 @@ test extracting credentials:
      'login': 'john.doe',
      'remote_address': '207.46.197.32',
      'remote_host': ''}
-    >>> plugin.strip_ad_domain = True
+
+We can lowercase the AD domain part of the login.
+
+    >>> plugin.lowercase_domain = True
+    >>> plugin.lowercase_logins = False
+    >>> plugin.strip_ad_domain = False
+    >>> request.environ['HTTP_X_REMOTE_USER'] = 'JOHN.DOE@DOMAIN.LOCAL'
+    >>> plugin.extractCredentials(request)['login']
+    'JOHN.DOE@domain.local'
+
+We can lowercase the whole login
+
+    >>> plugin.lowercase_logins = True
+    >>> plugin.lowercase_domain = False
+    >>> request.environ['HTTP_X_REMOTE_USER'] = 'JOHN.DOE@DOMAIN.LOCAL'
+    >>> plugin.extractCredentials(request)['login']
+    'john.doe@domain.local'
 
 
 test authentication
@@ -304,3 +320,5 @@ And also the strip_ad_domain option:
     >>> print plugin.authenticateCredentials(creds)
     ('john.doe', 'john.doe')
     >>> plugin.strip_ad_domain = False
+
+    
