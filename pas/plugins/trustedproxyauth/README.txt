@@ -266,10 +266,9 @@ It's possible to map a AD username to a plone username. Let's test
 that. We wan't to map jane.doe to john.doe. This should not work without
 configuring the username_mapping:
 
-    >>> creds = gencreds(plugin, 'jane.doe', '127.0.0.1')
-    >>> print plugin.authenticateCredentials(creds)
-    ('jane.doe', 'jane.doe')
-
+    >>> request.environ['HTTP_X_REMOTE_USER'] = 'jane.doe'
+    >>> plugin.extractCredentials(request)['login']
+    'jane.doe'
 
 When we configure the mapping now, it should work properly:
 
@@ -290,35 +289,7 @@ When we configure the mapping now, it should work properly:
     >>> pprint(plugin._getUsernameMapping())
     {'jane.doe': 'john.doe'}
 
-    >>> creds = gencreds(plugin, 'jane.doe', '127.0.0.1')
-    >>> print plugin.authenticateCredentials(creds)
-    ('john.doe', 'john.doe')
-
-The strip_nt_domain option should also work:
-
-    >>> plugin.username_mapping = ['localdomain\\JANE.DOE:john.doe']
-    >>> print plugin.authenticateCredentials(creds)
-    ('jane.doe', 'jane.doe')
-
-    >>> plugin.strip_nt_domain = True
-    >>> print plugin.authenticateCredentials(creds)
-    ('john.doe', 'john.doe')
-    >>> plugin.strip_nt_domain = False
-
-And also the strip_ad_domain option:
-
-    >>> plugin.strip_ad_domain = False
-    >>> plugin.username_mapping = ['JANE.DOE@domain.local:john.doe']
-    >>> pprint(plugin._getUsernameMapping())
-    {'jane.doe@domain.local': 'john.doe'}
-    >>> print plugin.authenticateCredentials(creds)
-    ('jane.doe', 'jane.doe')
-
-    >>> plugin.strip_ad_domain = True
-    >>> pprint(plugin._getUsernameMapping())
-    {'jane.doe': 'john.doe'}
-    >>> print plugin.authenticateCredentials(creds)
-    ('john.doe', 'john.doe')
-    >>> plugin.strip_ad_domain = False
-
+    >>> request.environ['HTTP_X_REMOTE_USER'] = 'jane.doe'
+    >>> plugin.extractCredentials(request)['login']
+    'john.doe'
     

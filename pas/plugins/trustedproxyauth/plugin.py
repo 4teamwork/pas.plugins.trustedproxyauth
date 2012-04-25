@@ -174,14 +174,6 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
                          'from %r for %r/%r', extractor, uid, login)
             return None
 
-        if self.username_mapping:
-            # TODO: creating the dict with the username mapping on every
-            # request is not very efficient.
-            username_mapping = self._getUsernameMapping()
-            if login in username_mapping:
-                login = username_mapping[login]
-                uid = login
-
         for idx, addr in enumerate(trusted_proxies):
             if IS_IP.match(addr):
                 continue
@@ -220,6 +212,13 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
         if login and remote_address:
 
             login = self._convertUsername(login)
+
+            if self.username_mapping:
+                # TODO: creating the dict with the username mapping on every
+                # request is not very efficient.
+                username_mapping = self._getUsernameMapping()
+                if login in username_mapping:
+                    login = username_mapping[login]
 
             creds['id'] = login
             creds['login'] = login
