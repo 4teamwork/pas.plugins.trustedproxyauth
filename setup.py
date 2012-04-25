@@ -5,60 +5,39 @@ This module contains the tool of pas.plugins.trustedproxyauth
 import os
 from setuptools import setup, find_packages
 
-
-def read(*rnames):
-    return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
-
 version = '1.0.2dev'
-
-long_description = (
-    read('docs', 'README.txt')
-    + '\n' +
-    'Change history\n'
-    '**************\n'
-    + '\n' +
-    read('docs', 'HISTORY.txt')
-    + '\n' +
-    'Detailed Documentation\n'
-    '**********************\n'
-    + '\n' +
-    read('pas',
-         'plugins',
-         'trustedproxyauth', 'README.txt')
-    + '\n' +
-    'Contributors\n'
-    '************\n'
-    + '\n' +
-    read('docs', 'CONTRIBUTORS.txt')
-    + '\n' +
-    'Download\n'
-    '********\n')
+maintainer = 'Thomas Buchberger'
 
 tests_require = ['zope.testing']
 
 setup(name='pas.plugins.trustedproxyauth',
       version=version,
-      description="Authenticates users who's login name is stored in a request header by a trusted proxy",
-      long_description=long_description,
-      # Get more strings from
-      # http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      description="Authenticates requests coming from a reverse proxy doing "
+                  "user authentication.",
+      long_description=open('README.txt').read() + '\n' + \
+                       open(os.path.join('docs', 'HISTORY.txt')).read(),
       classifiers=[
         'Framework :: Plone',
-        'Intended Audience :: Developers',
+        'Framework :: Plone :: 4.0',
+        'Framework :: Plone :: 4.1',
+        'Framework :: Zope2',
         'License :: OSI Approved :: GNU General Public License (GPL)',
+        'Programming Language :: Python',
+        'Topic :: System :: Systems Administration :: Authentication/Directory',
         ],
       keywords='',
       author='Thomas Buchberger',
       author_email='t.buchberger@4teamwork.ch',
-      url='http://www.4teamwork.ch',
+      maintainer=maintainer,
+      url='https://github.com/pas.plugins.trustedproxyauth',
       license='GPL',
       packages=find_packages(exclude=['ez_setup']),
       namespace_packages=['pas', 'pas.plugins'],
       include_package_data=True,
       zip_safe=False,
-      install_requires=['setuptools',
-                        # -*- Extra requirements: -*-
-                        ],
+      install_requires=[
+        'setuptools',
+        ],
       tests_require=tests_require,
       extras_require=dict(tests=tests_require),
       test_suite='pas.plugins.trustedproxyauth.tests.test_docs.test_suite',
