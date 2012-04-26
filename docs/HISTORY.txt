@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.1 (unreleased)
+1.1 (2012-04-26)
 ----------------
 
 - Added option to verify the user name given in the request header. If
