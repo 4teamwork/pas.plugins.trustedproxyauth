@@ -40,6 +40,11 @@ Login Name Header
     The name of the HTTP header containing the users login name. This header
     must be set by the authentication proxy. Defaults to ``X_REMOTE_USER``.
 
+Require Exisiting PAS User
+    If disabled, any login name provided in the header is authenticated
+    (recommended). If enabled, only login names that can be looked up with PAS
+    are authenticated.
+
 ``pas.plugins.trustedproxyauth`` supports user name transformations that may
 be needed in combination with some reverse proxies. The following options are
 supported:

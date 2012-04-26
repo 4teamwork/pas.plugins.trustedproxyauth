@@ -28,6 +28,17 @@
         </tr>
         <tr valign="top">
           <td>
+              <div class="form-label">Require exisiting PAS user</div>
+              <div class="form-help">If disabled, any login name provided in the header is authenticated (recommended).
+                  If enabled, only login names that can be looked up with PAS are authenticated.</div>
+          </td>
+          <td>
+              <input type="checkbox" name="verify_login" value="1" tal:attributes="checked context/verify_login|nothing" />
+          </td>
+        </tr>
+
+        <tr valign="top">
+          <td>
               <div class="form-label">Lowercase Logins</div>
               <div class="form-help">Transform the extracted login name to lowercase.</div>
           </td>

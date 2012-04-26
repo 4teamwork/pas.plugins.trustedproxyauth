@@ -4,6 +4,10 @@ Changelog
 1.1 (unreleased)
 ----------------
 
+- Added option to verify the user name given in the request header. If
+  enabled, only user names that can be looked up with PAS are authenticated.
+  [buchi]
+
 - Added a config page for plugin configuration and removed the ZMI
   properties that were used for configuration previously. With this change the
   user name mapping no longer needs to be calculated with each request.

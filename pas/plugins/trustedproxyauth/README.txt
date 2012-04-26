@@ -280,3 +280,22 @@ If a name could not be looked up, it does not work:
     >>> plugin.trusted_proxies = ['foohost']
     >>> print plugin.authenticateCredentials(creds)
     None
+
+Test user name verification
+
+    >>> plugin.verify_login
+    False
+    >>> browser.open(plugin_config_url)
+    >>> form = browser.getForm(index=0)
+    >>> form.getControl(name='trusted_proxies').value = '127.0.0.1'
+    >>> form.getControl(name='verify_login').value = True
+    >>> form.getControl('Update').click()
+    >>> plugin.verify_login
+    True
+    >>> creds = gencreds(plugin, 'john.doe', '127.0.0.1')
+    >>> print plugin.authenticateCredentials(creds)
+    None
+    >>> from Testing.ZopeTestCase import user_name
+    >>> creds = gencreds(plugin, user_name, '127.0.0.1')
+    >>> print plugin.authenticateCredentials(creds)
+    ('test_user_1_', 'test_user_1_')

@@ -3,6 +3,7 @@
 
 from AccessControl.SecurityInfo import ClassSecurityInfo
 from AccessControl.requestmethod import postonly
+from Acquisition import aq_inner, aq_parent
 from App.class_init import default__class_init__ as InitializeClass
 from OFS.Cache import Cacheable
 from Products.CMFCore.permissions import ManagePortal
@@ -73,6 +74,7 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
         self.strip_ad_domain = False
         self.username_mapping = PersistentList()
         self._username_mapping = PersistentMapping()
+        self.verify_login = False
 
     security.declarePrivate('_getUsernameMapping')
     def _getUsernameMapping(self):
@@ -149,6 +151,16 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
 
         for addr in (remote_address, remote_host):
             if addr in self.trusted_proxies:
+
+                # Upgrade config for versions<1.1
+                if not hasattr(self, 'verify_login'):
+                    self.verify_login = False
+
+                if self.verify_login:
+                    pas = aq_parent(aq_inner(self))
+                    if pas.getUserById(login) is None:
+                        return None
+
                 logger.debug('trusted user is %r:%r/%r',
                              addr, uid, login)
                 return uid, login
@@ -205,7 +217,8 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
         for flag in ['lowercase_logins',
                      'lowercase_domain',
                      'strip_nt_domain',
-                     'strip_ad_domain']:
+                     'strip_ad_domain',
+                     'verify_login']:
             if flag in REQUEST.form:
                 setattr(self, flag, True)
             else:
