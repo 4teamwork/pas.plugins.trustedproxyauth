@@ -1,0 +1,90 @@
+<h1 tal:replace="structure here/manage_page_header"> PAGE HEADER </h1>
+<h2 tal:replace="structure here/manage_tabs"> PAGE HEADER </h2>
+
+<h3>Trusted Proxy Authentication</h3>
+
+    <p class="form-help">
+      Authenticates requests coming from a trusted reverse proxy where the user name
+      is provided by a HTTP header.
+    </p>
+
+    <form action="manage_updateConfig" method="post">
+      <table>
+        <tr valign="top">
+          <td><div class="form-label">Trusted Proxy IPs</div>
+              <div class="form-help">Specify the ip address of your reverse proxy here.
+                  Only requests coming from a trusted ip will be considered for user name extraction</div>
+          </td>
+          <td><textarea name="trusted_proxies" cols="50" rows="5"
+                        tal:content="python:'\n'.join(context.trusted_proxies)"></textarea></td>
+        </tr>
+        <tr valign="top">
+          <td><div class="form-label">Login Name Header</div>
+          <div class="form-help">The name of the HTTP header containing the users login name.
+              This header must be set by the authentication proxy. Defaults to HTTP_X_REMOTE_USER.</div>
+          </td>
+          <td><input type="text" name="login_header"
+                     tal:attributes="value context/login_header"/></td>
+        </tr>
+        <tr valign="top">
+          <td>
+              <div class="form-label">Lowercase Logins</div>
+              <div class="form-help">Transform the extracted login name to lowercase.</div>
+          </td>
+          <td>
+              <input type="checkbox" name="lowercase_logins" value="1" tal:attributes="checked context/lowercase_logins" />
+          </td>
+        </tr>
+        <tr valign="top">
+          <td>
+              <div class="form-label">Lowercase Domain</div>
+              <div class="form-help">Transform the domain name part of the extracted login name to lowercase.
+                  This is useful when using Kerberos authentication and the user id consists
+                  of <code>userid@REALM</code>.
+              </div>
+          </td>
+          <td>
+              <input type="checkbox" name="lowercase_domain" value="1" tal:attributes="checked context/lowercase_domain" />
+          </td>
+        </tr>
+        <tr valign="top">
+          <td>
+              <div class="form-label">Strip NT Domain</div>
+              <div class="form-help">Remove the NT domain part from the extracted user name. All user names
+    in the form <code>DOMAIN\userid</code> are transformed to <code>userid</code>.</div>
+          </td>
+          <td><input type="checkbox" name="strip_nt_domain" value="1" tal:attributes="checked context/strip_nt_domain" />
+        </td>
+        <tr valign="top">
+          <td>
+              <div class="form-label">Strip AD Domain</div>
+              <div class="form-help">Remove the AD domain part from the extracted user name. All user names
+    in the form <code>userid@domain</code> are transformed to <code>userid</code>.</div>
+          </td>
+          <td>
+              <input type="checkbox" name="strip_ad_domain" value="1" tal:attributes="checked context/strip_ad_domain" />
+          </td>
+        </tr>
+        <tr valign="top">
+          <td>
+              <div class="form-label">User Name Mapping</div>
+              <div class="form-help">Specify a custom user name mapping by providing the extracted user name
+                  and the mapped user name separated by colon per line. Example:</div>
+              <pre>user1:guest
+user2:admin</pre>
+          </td>
+          <td><textarea name="username_mapping" cols="60" rows="20"
+                        tal:content="python:'\n'.join(context.username_mapping)"></textarea></td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <div class="form-element">
+              <input type="submit" value="Update"/>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </form>
+
+
+<h1 tal:replace="structure here/manage_page_footer"> PAGE FOOTER </h1>

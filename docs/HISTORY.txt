@@ -1,8 +1,13 @@
 Changelog
 =========
 
-1.0.2 (unreleased)
-------------------
+1.1 (unreleased)
+----------------
+
+- Added a config page for plugin configuration and removed the ZMI
+  properties that were used for configuration previously. With this change the
+  user name mapping no longer needs to be calculated with each request.
+  [buchi]
 
 - Do user name mapping in the extraction part instead of the authenticate part.
   [buchi]

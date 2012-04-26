@@ -21,27 +21,9 @@
           <td><input type="text" name="title"/></td>
         </tr>
         <tr>
-          <td class="form-label">Trusted Proxies</td>
-          <td><textarea name="trusted_proxies:list" cols="50" rows="5" tal:content="request/trusted_proxies|string:127.0.0.1"></textarea></td>
-        </tr>
-        <tr>
-          <td class="form-label">Login Header</td>
-          <td><input type="text" name="login_header" tal:attributes="value request/login_header|string:HTTP_X_REMOTE_USER"/></td>
-        </tr>
-        <tr>
-          <td class="form-label">Lowercase Logins</td>
-          <td><input type="checkbox" name="lowercase_logins" value="1" tal:attributes="checked request/lowercase_logins|string:1" />
-        </td>
-        </tr>
-        <tr>
-          <td class="form-label">Username mapping</td>
-          <td><textarea name="username_mapping:list" cols="50" rows="5" tal:content="request/username_mapping|string:"></textarea></td>
-        </tr>
-
-        <tr>
           <td colspan="2">
             <div class="form-element">
-              <input type="submit" value="add plugin"/>
+              <input type="submit" value="Add"/>
             </div>
           </td>
         </tr>

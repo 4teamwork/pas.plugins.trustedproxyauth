@@ -2,13 +2,17 @@
 """
 
 from AccessControl.SecurityInfo import ClassSecurityInfo
+from AccessControl.requestmethod import postonly
 from App.class_init import default__class_init__ as InitializeClass
 from OFS.Cache import Cacheable
+from Products.CMFCore.permissions import ManagePortal
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin
 from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
 from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 from Products.PluggableAuthService.utils import classImplements
+from ZODB.PersistentMapping import PersistentMapping
+from ZODB.PersistentList import PersistentList
 from socket import gethostbyname, herror, gaierror
 import logging
 import re
@@ -26,13 +30,9 @@ manage_addTrustedProxyAuthPlugin = PageTemplateFile(
     globals(), __name__="manage_addTrustedProxyAuthPlugin")
 
 
-def addTrustedProxyAuthPlugin(dispatcher, id, title="", trusted_proxies=(),
-                              login_header='', lowercase_logins=False,
-                              username_mapping=(),
-                              REQUEST=None):
+def addTrustedProxyAuthPlugin(dispatcher, id, title="", REQUEST=None):
     """Add a TrustedProxy plugin to a PAS."""
-    p=TrustedProxyAuthPlugin(id, title, trusted_proxies, login_header,
-                             lowercase_logins, username_mapping)
+    p=TrustedProxyAuthPlugin(id, title)
     dispatcher._setObject(p.getId(), p)
 
     if REQUEST is not None:
@@ -50,79 +50,41 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
     meta_type = 'Trusted Proxy Authentication'
     security = ClassSecurityInfo()
 
-    _properties = BasePlugin._properties + (
-        { 'id'    : 'trusted_proxies',
-          'label' : 'IP addresses of trusted proxies',
-          'type'  : 'lines',
-          'mode'  : 'w',
-          },
+    # ZMI tab for configuration page
+    manage_options = (({'label': 'Configuration',
+                        'action': 'manage_config'},)
+                      + BasePlugin.manage_options
+                      + Cacheable.manage_options
+                     )
 
-        { 'id'    : 'login_header',
-          'label' : 'HTTP header containing the login name',
-          'type'  : 'string',
-          'mode'  : 'w',
-          },
+    security.declareProtected(ManagePortal, 'manage_config')
+    manage_config = PageTemplateFile('www/config', globals(),
+                                     __name__='manage_config')
 
-        { 'id'    : 'lowercase_logins',
-          'label' : 'Transform login names to lowercase',
-          'type'  : 'boolean',
-          'mode'  : 'w',
-          },
 
-        { 'id'    : 'lowercase_domain',
-          'label' : 'Transform AD domain to lowercase',
-          'type'  : 'boolean',
-          'mode'  : 'w',
-          },
-
-        { 'id'    : 'strip_nt_domain',
-          'label' : 'Strip NT domain name from login (DOMAIN\\userid->userid)',
-          'type'  : 'boolean',
-          'mode'  : 'w',
-          },
-
-        { 'id'    : 'strip_ad_domain',
-          'label' :
-              'Strip AD domain name from login (userid@domain.name->userid)',
-          'type'  : 'boolean',
-          'mode'  : 'w',
-          },
-
-        { 'id'    : 'username_mapping',
-          'label' : 'Username mapping (adusername:ploneusername)',
-          'type'  : 'lines',
-          'mode'  : 'w',
-          },
-
-        )
-
-    def __init__(self, id, title=None, trusted_proxies=None,
-                 login_header=None, lowercase_logins=False,
-                 username_mapping=None):
+    def __init__(self, id, title=None):
         self._setId(id)
         self.title = title
-        self.trusted_proxies = trusted_proxies
-        self.login_header = login_header
-        self.lowercase_logins = lowercase_logins
+        self.trusted_proxies = PersistentList(['127.0.0.1'])
+        self.login_header = 'HTTP_X_REMOTE_USER'
+        self.lowercase_logins = False
         self.lowercase_domain = False
-        self.username_mapping = username_mapping
         self.strip_nt_domain = False
         self.strip_ad_domain = False
+        self.username_mapping = PersistentList()
+        self._username_mapping = PersistentMapping()
 
     security.declarePrivate('_getUsernameMapping')
     def _getUsernameMapping(self):
         """Returns a dict containing the username
         mapping configuration.
         """
-        mapping = {}
+        mapping = PersistentMapping()
         for line in self.username_mapping:
             if not line.strip():
                 continue
-
-            adlogin, plonelogin = line.strip().split(':')
-            adlogin = self._convertUsername(adlogin)
-
-            mapping[adlogin] = plonelogin
+            login, mapped_login = line.strip().split(':')
+            mapping[login] = mapped_login
 
         return mapping
 
@@ -157,14 +119,13 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
     def authenticateCredentials(self, credentials):
         """Authenticate Credentials for Trusted Proxy
         """
-        trusted_proxies = list(self.getProperty('trusted_proxies', ()))
         login = credentials.get('login')
         extractor = credentials.get('extractor')
         uid = credentials.get('id')
         remote_address = credentials.get('remote_address')
         remote_host = credentials.get('remote_host')
 
-        if not trusted_proxies:
+        if not self.trusted_proxies:
             logger.warn('authenticateCredentials ignoring request '
                         'because trusted_proxies is not configured')
             return None
@@ -174,7 +135,7 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
                          'from %r for %r/%r', extractor, uid, login)
             return None
 
-        for idx, addr in enumerate(trusted_proxies):
+        for idx, addr in enumerate(self.trusted_proxies):
             if IS_IP.match(addr):
                 continue
             # If it's not an IP, then it's a hostname, and we need to
@@ -182,19 +143,19 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
             try:
                 # XXX Should we cache calls to gethostbyname? Supposedly
                 # it can be quite expensive for a 'DNS Miss'.
-                trusted_proxies[idx+1:idx+1] = [gethostbyname(addr)]
+                self.trusted_proxies[idx+1:idx+1] = [gethostbyname(addr)]
             except (herror, gaierror):
                 logger.warn('Could not resolve hostname to address: %r', addr)
 
         for addr in (remote_address, remote_host):
-            if addr in trusted_proxies:
+            if addr in self.trusted_proxies:
                 logger.debug('trusted user is %r:%r/%r',
                              addr, uid, login)
                 return uid, login
 
         logger.warn('authenticateCredentials ignoring request '
                     'from %r - not in the list of trusted proxies (%r)',
-                    (remote_address, remote_host), trusted_proxies)
+                    (remote_address, remote_host), self.trusted_proxies)
         return None
 
     security.declarePrivate('extractCredentials')
@@ -202,8 +163,7 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
         """Extract Credentials for Trusted Proxy
         """
         creds = {}
-        login_header = self.getProperty('login_header', 'X_REMOTE_USER')
-        login = request.get_header(login_header, '')
+        login = request.get_header(self.login_header, '')
 
         # We need the IP of the Proxy, not the real client ip, thus we
         # can't use request.getClientAddr()
@@ -213,12 +173,12 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
 
             login = self._convertUsername(login)
 
-            if self.username_mapping:
-                # TODO: creating the dict with the username mapping on every
-                # request is not very efficient.
-                username_mapping = self._getUsernameMapping()
-                if login in username_mapping:
-                    login = username_mapping[login]
+            # Upgrade username_mappings for versions<1.1
+            if not hasattr(self, '_username_mapping'):
+                self._username_mapping = self._getUsernameMapping()
+
+            if login in self._username_mapping:
+                login = self._username_mapping[login]
 
             creds['id'] = login
             creds['login'] = login
@@ -229,6 +189,35 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
                          remote_address, login)
 
         return creds
+
+    security.declareProtected(ManagePortal, 'manage_updateConfig')
+    @postonly
+    def manage_updateConfig(self, REQUEST):
+        """Update configuration of Trusted Proxy Authentication Plugin.
+        """
+        response = REQUEST.response
+
+        self.trusted_proxies = PersistentList(
+            [line.strip() for line in REQUEST.form.get(
+             'trusted_proxies').split('\n') if line.strip()])
+        self.login_header = REQUEST.form.get('login_header')
+
+        for flag in ['lowercase_logins',
+                     'lowercase_domain',
+                     'strip_nt_domain',
+                     'strip_ad_domain']:
+            if flag in REQUEST.form:
+                setattr(self, flag, True)
+            else:
+                setattr(self, flag, False)
+        
+        self.username_mapping = PersistentList(
+            [line.strip() for line in REQUEST.form.get(
+             'username_mapping').split('\n') if line.strip()])
+        self._username_mapping = self._getUsernameMapping()
+
+        response.redirect('%s/manage_config?manage_tabs_message=%s' %
+            (self.absolute_url(), 'Configuration+updated.'))
 
 
 classImplements(TrustedProxyAuthPlugin,
