@@ -8,7 +8,10 @@ from setuptools import setup, find_packages
 version = '1.1.1.dev0'
 maintainer = 'Thomas Buchberger'
 
-tests_require = ['zope.testing']
+tests_require = [
+    'zope.testing',
+    'Plone',
+    ]
 
 setup(name='pas.plugins.trustedproxyauth',
       version=version,
