@@ -299,3 +299,45 @@ Test user name verification
     >>> creds = gencreds(plugin, user_name, '127.0.0.1')
     >>> print plugin.authenticateCredentials(creds)
     ('test_user_1_', 'test_user_1_')
+
+Test plone login emulation
+
+    >>> plugin.plone_login_timeout
+    -1
+    >>> browser.open(plugin_config_url)
+    >>> form = browser.getForm(index=0)
+    >>> form.getControl(name='verify_login').value = False
+    >>> form.getControl(name='plone_login_timeout').value = '2'
+    >>> form.getControl('Update').click()
+    >>> plugin.plone_login_timeout
+    2
+    >>> userid = 'jack'
+    >>> from Products.CMFCore.utils import getToolByName
+    >>> mtool = getToolByName(self.portal, 'portal_membership')
+    >>> self.portal.acl_users.userFolderAddUser(userid, 'secret', [], [], [])
+    >>> print mtool.getHomeFolder(id=userid)
+    None
+    >>> user = mtool.getMemberById(userid)
+    >>> login_time = user.getProperty('login_time')
+    >>> login_time
+    DateTime('2000/01/01 00:00:00 GMT+1')
+    >>> dummy = mtool.setMemberareaCreationFlag()
+    >>> creds = gencreds(plugin, userid, '127.0.0.1')
+    >>> print plugin.authenticateCredentials(creds)
+    ('jack', 'jack')
+    >>> mtool.getHomeFolder(id=userid)
+    <ATFolder at /plone/Members/jack>
+    >>> login_time_updated = mtool.getMemberById(userid).getProperty('login_time')
+    >>> login_time_updated > login_time
+    True
+    >>> plugin.authenticateCredentials(creds)
+    ('jack', 'jack')
+    >>> mtool.getMemberById(userid).getProperty('login_time') == login_time_updated
+    True
+    >>> import time
+    >>> time.sleep(2)
+    >>> plugin.authenticateCredentials(creds)
+    ('jack', 'jack')
+    >>> mtool.getMemberById(userid).getProperty('login_time') > login_time_updated
+    True
+

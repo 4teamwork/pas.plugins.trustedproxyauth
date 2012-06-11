@@ -36,7 +36,25 @@
               <input type="checkbox" name="verify_login" value="1" tal:attributes="checked context/verify_login|nothing" />
           </td>
         </tr>
-
+        <tr valign="top">
+          <td>
+              <div class="form-label">Plone Login Timeout (in seconds)</div>
+              <div class="form-help">If a value >= 0 is specified, a Plone login is emulated the first time the user is authenticated.
+                  If no authentication occurs for the given timeout period, the login is done again when the next authentication occurs.
+                  Plone login emulation includes:
+                  <ul>
+                      <li>Creating member area if it does not exist</li>
+                      <li>Sending logged in event</li>
+                      <li>Clearing Clipboard</li>
+                      <li>Storing login time</li>
+                  </ul>
+                  </div>
+          </td>
+          <td>
+              <input type="text" name="plone_login_timeout"
+                     tal:attributes="value context/plone_login_timeout|nothing"/>
+          </td>
+        </tr>
         <tr valign="top">
           <td>
               <div class="form-label">Lowercase Logins</div>

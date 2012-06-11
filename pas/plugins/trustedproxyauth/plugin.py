@@ -6,17 +6,23 @@ from AccessControl.requestmethod import postonly
 from Acquisition import aq_inner, aq_parent
 from App.class_init import default__class_init__ as InitializeClass
 from OFS.Cache import Cacheable
+from DateTime import DateTime
 from Products.CMFCore.permissions import ManagePortal
+from Products.CMFCore.utils import getToolByName
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin
 from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
 from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 from Products.PluggableAuthService.utils import classImplements
+from Products.PlonePAS.events import UserLoggedInEvent
+from Products.PlonePAS.events import UserInitialLoginInEvent
 from ZODB.PersistentMapping import PersistentMapping
 from ZODB.PersistentList import PersistentList
 from socket import gethostbyname, herror, gaierror
+from zope import event
 import logging
 import re
+import time
 
 
 logger = logging.getLogger('pas.plugins.trustedproxyauthauth')
@@ -62,6 +68,7 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
     manage_config = PageTemplateFile('www/config', globals(),
                                      __name__='manage_config')
 
+    _plone_login_times = {}
 
     def __init__(self, id, title=None):
         self._setId(id)
@@ -75,6 +82,8 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
         self.username_mapping = PersistentList()
         self._username_mapping = PersistentMapping()
         self.verify_login = False
+        self.emulate_plone_login = False
+        self.plone_login_timeout = -1
 
     security.declarePrivate('_getUsernameMapping')
     def _getUsernameMapping(self):
@@ -116,6 +125,40 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
                 login = login.split('@', 1)[0]
 
         return login
+
+    security.declarePrivate('_loginUser')
+    def _loginUser(self, login):
+        """Handle login for the given user
+        """
+        mtool = getToolByName(self, 'portal_membership')
+        user = mtool.getUser(login)
+        member = mtool.getMemberById(login)
+
+        # Set login times
+        first_login = False
+        default = DateTime('2000/01/01')
+        login_time = member.getProperty('login_time', default)
+        if login_time == default:
+            first_login = True
+            login_time = DateTime()
+        member.setMemberProperties(dict(
+            login_time=mtool.ZopeTime(),
+            last_login_time=login_time
+        ))
+
+        # Fire login event
+        if first_login:
+            event.notify(UserInitialLoginInEvent(user))
+        else:
+            event.notify(UserLoggedInEvent(user))
+
+        # Expire the clipboard
+        if self.REQUEST.get('__cp', None) is not None:
+            self.REQUEST.RESPONSE.expireCookie('__cp', path='/')
+
+        # Create member area
+        mtool.createMemberArea(member_id=login)
+
 
     security.declarePrivate('authenticateCredentials')
     def authenticateCredentials(self, credentials):
@@ -163,6 +206,13 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
 
                 logger.debug('trusted user is %r:%r/%r',
                              addr, uid, login)
+
+                if self.plone_login_timeout >= 0:
+                    last_login_time = self._plone_login_times.get(login, 0)
+                    if time.time() > last_login_time + self.plone_login_timeout:
+                        self._loginUser(login)
+                    self._plone_login_times[login] = time.time()
+
                 return uid, login
 
         logger.warn('authenticateCredentials ignoring request '
@@ -213,6 +263,7 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
             [line.strip() for line in REQUEST.form.get(
              'trusted_proxies').split('\n') if line.strip()])
         self.login_header = REQUEST.form.get('login_header')
+        self.plone_login_timeout = int(REQUEST.form.get('plone_login_timeout'))
 
         for flag in ['lowercase_logins',
                      'lowercase_domain',

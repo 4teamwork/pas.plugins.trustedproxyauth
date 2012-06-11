@@ -1,11 +1,13 @@
 Changelog
 =========
 
-1.1.1 (unreleased)
-------------------
+1.2 (unreleased)
+----------------
 
-- Nothing changed yet.
-
+- Added option to emulate Plone logins which includes the creation of member
+  areas and firing login events. The feature can be enabled by setting the
+  `Plone Login Timeout` option.
+  [buchi]
 
 1.1 (2012-04-26)
 ----------------
