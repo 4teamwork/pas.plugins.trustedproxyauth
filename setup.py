@@ -5,7 +5,7 @@ This module contains the tool of pas.plugins.trustedproxyauth
 import os
 from setuptools import setup, find_packages
 
-version = '1.2'
+version = '1.2.1.dev0'
 maintainer = 'Thomas Buchberger'
 
 tests_require = [
