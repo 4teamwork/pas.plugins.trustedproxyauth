@@ -319,8 +319,8 @@ Test plone login emulation
     None
     >>> user = mtool.getMemberById(userid)
     >>> login_time = user.getProperty('login_time')
-    >>> login_time
-    DateTime('2000/01/01 00:00:00 GMT+1')
+    >>> login_time.ISO()
+    '2000-01-01T00:00:00'
     >>> dummy = mtool.setMemberareaCreationFlag()
     >>> creds = gencreds(plugin, userid, '127.0.0.1')
     >>> print plugin.authenticateCredentials(creds)
@@ -340,4 +340,3 @@ Test plone login emulation
     ('jack', 'jack')
     >>> mtool.getMemberById(userid).getProperty('login_time') > login_time_updated
     True
-
