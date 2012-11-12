@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-This module contains the tool of pas.plugins.trustedproxyauth
-"""
 import os
 from setuptools import setup, find_packages
 
@@ -16,9 +12,9 @@ tests_require = [
 setup(name='pas.plugins.trustedproxyauth',
       version=version,
       description="Authenticates requests coming from a reverse proxy doing "
-                  "user authentication.",
+      "user authentication.",
       long_description=open('README.txt').read() + '\n' + \
-                       open(os.path.join('docs', 'HISTORY.txt')).read(),
+          open(os.path.join('docs', 'HISTORY.txt')).read(),
       classifiers=[
         'Framework :: Plone',
         'Framework :: Plone :: 4.0',
@@ -28,21 +24,25 @@ setup(name='pas.plugins.trustedproxyauth',
         'Programming Language :: Python',
         'Topic :: System :: Systems Administration :: Authentication/Directory',
         ],
-      keywords='',
-      author='Thomas Buchberger',
-      author_email='t.buchberger@4teamwork.ch',
+
+      keywords='pas plugins trusted proxy auth plone',
+      author='4teamwork GmbH',
+      author_email='mailto:info@4teamwork.ch',
       maintainer=maintainer,
       url='https://github.com/4teamwork/pas.plugins.trustedproxyauth',
-      license='GPL',
+      license='GPL2',
+
       packages=find_packages(exclude=['ez_setup']),
       namespace_packages=['pas', 'pas.plugins'],
       include_package_data=True,
       zip_safe=False,
+
       install_requires=[
         'setuptools',
         ],
       tests_require=tests_require,
       extras_require=dict(tests=tests_require),
+
       test_suite='pas.plugins.trustedproxyauth.tests.test_docs.test_suite',
       entry_points="""
       # -*- entry_points -*-
