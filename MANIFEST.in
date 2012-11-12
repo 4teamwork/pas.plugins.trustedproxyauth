@@ -1,3 +1,7 @@
-recursive-include docs pas
-include *.txt *rst
+recursive-include pas *
+recursive-include docs *
+include *.txt
+include *.rst
 global-exclude *.pyc
+global-exclude ._*
+global-exclude *.mo
