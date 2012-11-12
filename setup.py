@@ -13,7 +13,7 @@ setup(name='pas.plugins.trustedproxyauth',
       version=version,
       description="Authenticates requests coming from a reverse proxy doing "
       "user authentication.",
-      long_description=open('README.txt').read() + '\n' + \
+      long_description=open('README.rst').read() + '\n' + \
           open(os.path.join('docs', 'HISTORY.txt')).read(),
       classifiers=[
         'Framework :: Plone',
