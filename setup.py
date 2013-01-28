@@ -15,14 +15,17 @@ setup(name='pas.plugins.trustedproxyauth',
       "user authentication.",
       long_description=open('README.rst').read() + '\n' + \
           open(os.path.join('docs', 'HISTORY.txt')).read(),
+
+      # Get more strings from
+      # http://www.python.org/pypi?%3Aaction=list_classifiers
+
       classifiers=[
         'Framework :: Plone',
         'Framework :: Plone :: 4.0',
         'Framework :: Plone :: 4.1',
-        'Framework :: Zope2',
-        'License :: OSI Approved :: GNU General Public License (GPL)',
+        'Framework :: Plone :: 4.2',
         'Programming Language :: Python',
-        'Topic :: System :: Systems Administration :: Authentication/Directory',
+        'Topic :: Software Development :: Libraries :: Python Modules',
         ],
 
       keywords='pas plugins trusted proxy auth plone',
