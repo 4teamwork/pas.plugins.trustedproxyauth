@@ -82,7 +82,7 @@ Links
   https://github.com/4teamwork/pas.plugins.trustedproxyauth
 - Issue tracker:
   https://github.com/4teamwork/pas.plugins.trustedproxyauth/issues
-- Package on pypi: http://pypi.python.org/pypi/pas.plugins.trustedproxyauth
+- Pypi: http://pypi.python.org/pypi/pas.plugins.trustedproxyauth
 - Continuous integration: https://jenkins.4teamwork.ch/search?q=pas.plugins.trustedproxyauth
 
 
