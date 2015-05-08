@@ -29,7 +29,7 @@ setup(name='pas.plugins.trustedproxyauth',
         ],
 
       keywords='pas plugins trusted proxy auth plone',
-      author='4teamwork GmbH',
+      author='4teamwork AG',
       author_email='mailto:info@4teamwork.ch',
       maintainer=maintainer,
       url='https://github.com/4teamwork/pas.plugins.trustedproxyauth',
