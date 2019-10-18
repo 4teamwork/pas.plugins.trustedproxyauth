@@ -5,9 +5,13 @@ version = '1.2.1.dev0'
 maintainer = 'Thomas Buchberger'
 
 tests_require = [
-    'zope.testing',
     'Plone',
-    'Products.PloneTestCase',
+    'ftw.builder',
+    'ftw.testbrowser',
+    'ftw.testing',
+    'plone.app.testing',
+    'unittest2',
+    'zope.testing',
     ]
 
 setup(name='pas.plugins.trustedproxyauth',
