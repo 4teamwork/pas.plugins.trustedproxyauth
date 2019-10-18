@@ -5,6 +5,7 @@ Changelog
 ------------------
 
 - Drop Plone 4.0 and 4.1 support. [jone]
+- Add Plone 5 support. [busykoala]
 
 
 1.2 (2012-06-11)
