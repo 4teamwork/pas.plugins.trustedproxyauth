@@ -7,6 +7,7 @@ maintainer = 'Thomas Buchberger'
 tests_require = [
     'zope.testing',
     'Plone',
+    'Products.PloneTestCase',
     ]
 
 setup(name='pas.plugins.trustedproxyauth',
