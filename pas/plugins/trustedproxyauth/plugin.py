@@ -159,7 +159,6 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
         # Create member area
         mtool.createMemberArea(member_id=login)
 
-
     security.declarePrivate('authenticateCredentials')
     def authenticateCredentials(self, credentials):
         """Authenticate Credentials for Trusted Proxy
