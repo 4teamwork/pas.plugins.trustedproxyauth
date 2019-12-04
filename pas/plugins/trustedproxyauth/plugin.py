@@ -180,6 +180,8 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
             return None
 
         for idx, addr in enumerate(self.trusted_proxies):
+            #remove comment from addr
+            addr = re.sub(r'(?m) *#.*\n?', '', addr).strip()
             if IS_IP.match(addr):
                 continue
             # If it's not an IP, then it's a hostname, and we need to
