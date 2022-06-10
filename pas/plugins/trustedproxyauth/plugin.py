@@ -4,7 +4,7 @@
 from AccessControl.SecurityInfo import ClassSecurityInfo
 from AccessControl.requestmethod import postonly
 from Acquisition import aq_inner, aq_parent
-from App.class_init import default__class_init__ as InitializeClass
+from AccessControl.class_init import InitializeClass
 from OFS.Cache import Cacheable
 from DateTime import DateTime
 from Products.CMFCore.permissions import ManagePortal
@@ -113,7 +113,7 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
         elif self.lowercase_domain and '@' in login:
             user, domain = login.rsplit('@', 1)
             login = '%s@%s' % (user, domain.lower())
-            
+
         if self.strip_nt_domain:
             # DOMAIN\userid
             if '\\' in login:
@@ -273,7 +273,7 @@ class TrustedProxyAuthPlugin(BasePlugin, Cacheable):
                 setattr(self, flag, True)
             else:
                 setattr(self, flag, False)
-        
+
         self.username_mapping = PersistentList(
             [line.strip() for line in REQUEST.form.get(
              'username_mapping').split('\n') if line.strip()])
